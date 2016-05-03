@@ -1,6 +1,27 @@
 # Adocb – AsciiDoc Builder
 
-Recommended settings in the main AsciiDoc file:
+## Installation on MacOS X
+
+Clone the Adoc repository:
+----
+git clone https://github.com/m-click/adocb.git
+----
+
+Change to the Adoc folder:
+----
+cd adocb
+----
+
+Register that folder in the PATH:
+----
+sudo -s 'pwd > /etc/paths.d/adocb'
+----
+
+## Custom settings
+
+Recommended settings in the main AsciiDoc file
+for custom output location and file name,
+as well as a custom PDF theme:
 
 ----
 :output: ../output
