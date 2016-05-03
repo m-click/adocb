@@ -3,6 +3,7 @@
 Recommended settings in the main AsciiDoc file:
 
 ----
+:output: ../output
 :pdf-fontsdir: ../theme
 :pdf-stylesdir: ../theme
 :source-highlighter: coderay

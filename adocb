@@ -2,6 +2,7 @@
 
 import errno
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -40,13 +41,30 @@ def create_gemdir(gemdir, packages, pre_packages):
     gem_install(temp_gemdir, pre_packages, pre=True)
     os.rename(temp_gemdir, gemdir)
 
+def get_output_name_path(filepath):
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    m = re.search(r'^:output:\s*(\S+)$', data, re.MULTILINE)
+    if m is None:
+        return os.path.splitext(os.path.basename(filepath))[0]
+    output_name_path = m.group(1)
+    output_suffix = os.path.splitext(output_name_path)[1]
+    if output_suffix != '':
+        raise ValueError('Output filename must be specified without suffix: {!r}'.format(output_name_path))
+    return output_name_path
+
 def asciidoctor_pdf(gemdir, themedir, filepath):
+    output_suffix = '.pdf'
     filedir, filename = os.path.split(os.path.abspath(filepath))
+    output_name_path = get_output_name_path(filepath)
+    outputpath = os.path.join(filedir, output_name_path) + output_suffix
     asciidoctor_pdf_path = os.path.join(gemdir, 'bin', 'asciidoctor-pdf')
     args = [
         asciidoctor_pdf_path,
         '-r',
         'asciidoctor-diagram',
+        '--out-file',
+        outputpath,
         '--',
         filename,
     ]
