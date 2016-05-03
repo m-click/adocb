@@ -1,0 +1,9 @@
+# Adocb – AsciiDoc Builder
+
+Recommended settings in the main AsciiDoc file:
+
+----
+:pdf-fontsdir: ../theme
+:pdf-stylesdir: ../theme
+:source-highlighter: coderay
+----

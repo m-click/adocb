@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+import errno
+import os
+import subprocess
+import sys
+import tempfile
+
+def makedirs_exist_ok(name, mode):
+    # Portability with Python 2, see http://stackoverflow.com/a/600612
+    try:
+        os.makedirs(name, mode)
+    except OSError as e:
+        if e.errno == errno.EEXIST and os.path.isdir(name):
+            pass
+        else:
+            raise
+
+def gem_install(gemdir, packages, pre):
+    args = [
+        'gem',
+        'install',
+        '--install-dir',
+        gemdir,
+    ]
+    if pre:
+        args.append('--pre')
+    for package in packages:
+        args.append(package)
+    subprocess.check_call(args)
+
+def create_gemdir(gemdir, packages, pre_packages):
+    if os.path.exists(gemdir):
+        return
+    parentdir, dirname = os.path.split(gemdir)
+    prefix = '{}.temp.'.format(dirname)
+    makedirs_exist_ok(parentdir, 0o700)
+    temp_gemdir = tempfile.mkdtemp(suffix='', prefix=prefix, dir=parentdir)
+    gem_install(temp_gemdir, packages, pre=False)
+    gem_install(temp_gemdir, pre_packages, pre=True)
+    os.rename(temp_gemdir, gemdir)
+
+def asciidoctor_pdf(gemdir, themedir, filepath):
+    filedir, filename = os.path.split(os.path.abspath(filepath))
+    asciidoctor_pdf_path = os.path.join(gemdir, 'bin', 'asciidoctor-pdf')
+    args = [
+        asciidoctor_pdf_path,
+        '-r',
+        'asciidoctor-diagram',
+        '--',
+        filename,
+    ]
+    env = {
+        'GEM_HOME': gemdir,
+        'LC_ALL': 'en_US.UTF-8',
+        'PATH': os.getenv('PATH'),
+    }
+    subprocess.check_call(args, cwd=filedir, env=env)
+
+def build_doc(gemdir, themedir, filepath):
+    create_gemdir(
+        gemdir,
+        packages=[
+            'asciidoctor',
+            'asciidoctor-diagram',
+            'coderay',
+        ],
+        pre_packages=[
+            'asciidoctor-pdf',
+        ],
+    )
+    asciidoctor_pdf(gemdir, themedir, filepath)
+
+def check_graphviz():
+    try:
+        args = [
+            'dot',
+            '-V',
+        ]
+        env = {
+            'LC_ALL': 'en_US.UTF-8',
+            'PATH': os.getenv('PATH'),
+        }
+        output = subprocess.check_output(args, env=env, stderr=subprocess.STDOUT)
+    except Exception as e:
+        raise RuntimeError('Unable to find the "dot" tool. Please install Graphviz:\n\nhttp://www.graphviz.org/\n')
+
+usage = '''
+Usage:
+
+    {} FILE-1.adoc [...]
+
+'''
+
+def main():
+    rootdir = os.path.abspath(os.path.dirname(__file__))
+    check_graphviz()
+    args = sys.argv[1:]
+    if len(args) >= 1:
+        filepaths = args
+        gemdir = os.path.join(rootdir, 'var', 'gem')
+        themedir = os.path.join(rootdir, 'theme')
+        for filepath in filepaths:
+            build_doc(gemdir, themedir, filepath)
+        return
+    sys.stdout.write(usage.format(sys.argv[0]))
+    sys.exit(1)
+
+if __name__ == '__main__':
+    main()
