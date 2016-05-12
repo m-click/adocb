@@ -41,6 +41,8 @@ def gem_install(gemdir, packages, pre):
         'install',
         '--install-dir',
         gemdir,
+        '--no-rdoc',
+        '--no-ri',
     ]
     if pre:
         args.append('--pre')
