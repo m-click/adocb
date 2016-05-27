@@ -73,14 +73,24 @@ def get_output_name_path(filepath):
         raise ValueError('Output filename must be specified without suffix: {!r}'.format(output_name_path))
     return output_name_path
 
-def asciidoctor_pdf(gemdir, filepath):
-    output_suffix = '.pdf'
+def asciidoctor(gemdir, output_format, filepath):
+    if output_format == 'html':
+        output_suffix = '.html'
+        backend = 'html'
+    elif output_format == 'pdf':
+        output_suffix = '.pdf'
+        backend = 'pdf'
+    else:
+        raise ValueError('Invalid output format: {!r}'.format(output_format))
     filedir, filename = os.path.split(os.path.abspath(filepath))
     output_name_path = get_output_name_path(filepath)
     outputpath = os.path.join(filedir, output_name_path) + output_suffix
+    # Use the "asciidoctor-pdf" command line tool for both, HTML and PDF
     asciidoctor_pdf_path = os.path.join(gemdir, 'bin', 'asciidoctor-pdf')
     args = [
         asciidoctor_pdf_path,
+        '-b',
+        backend,
         '-r',
         'asciidoctor-diagram',
         '--out-file',
@@ -95,7 +105,7 @@ def asciidoctor_pdf(gemdir, filepath):
     }
     subprocess.check_call(args, cwd=filedir, env=env)
 
-def build_doc(rootdir, filepath):
+def build_doc(rootdir, output_format, filepath):
     gemdir = os.path.join(rootdir, 'var', 'gem')
     create_gemdir(
         gemdir,
@@ -108,7 +118,7 @@ def build_doc(rootdir, filepath):
             'asciidoctor-pdf',
         ],
     )
-    asciidoctor_pdf(gemdir, filepath)
+    asciidoctor(gemdir, output_format, filepath)
 
 def check_graphviz():
     try:
@@ -127,7 +137,12 @@ def check_graphviz():
 usage = '''
 Usage:
 
-    {} FILE-1.adoc [...]
+    {name} FORMAT FILE.adoc
+
+Examples:
+
+    {name} html mydoc.adoc
+    {name} pdf  mydoc.adoc
 
 '''
 
@@ -135,12 +150,11 @@ def main():
     rootdir = os.path.abspath(os.path.dirname(__file__))
     check_graphviz()
     args = sys.argv[1:]
-    if len(args) >= 1:
-        filepaths = args
-        for filepath in filepaths:
-            build_doc(rootdir, filepath)
+    if len(args) == 2:
+        output_format, filepath = args
+        build_doc(rootdir, output_format, filepath)
         return
-    sys.stdout.write(usage.format(sys.argv[0]))
+    sys.stdout.write(usage.format(name=sys.argv[0]))
     sys.exit(1)
 
 if __name__ == '__main__':

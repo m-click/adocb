@@ -24,6 +24,7 @@ for custom output location and file name,
 as well as a custom PDF theme:
 
 ----
+:data-uri:
 :output: ../output
 :pdf-fontsdir: ../theme
 :pdf-stylesdir: ../theme
