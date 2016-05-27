@@ -73,7 +73,7 @@ def get_output_name_path(filepath):
         raise ValueError('Output filename must be specified without suffix: {!r}'.format(output_name_path))
     return output_name_path
 
-def asciidoctor_pdf(gemdir, themedir, filepath):
+def asciidoctor_pdf(gemdir, filepath):
     output_suffix = '.pdf'
     filedir, filename = os.path.split(os.path.abspath(filepath))
     output_name_path = get_output_name_path(filepath)
@@ -95,7 +95,7 @@ def asciidoctor_pdf(gemdir, themedir, filepath):
     }
     subprocess.check_call(args, cwd=filedir, env=env)
 
-def build_doc(gemdir, themedir, filepath):
+def build_doc(gemdir, filepath):
     create_gemdir(
         gemdir,
         packages=[
@@ -107,7 +107,7 @@ def build_doc(gemdir, themedir, filepath):
             'asciidoctor-pdf',
         ],
     )
-    asciidoctor_pdf(gemdir, themedir, filepath)
+    asciidoctor_pdf(gemdir, filepath)
 
 def check_graphviz():
     try:
@@ -137,9 +137,8 @@ def main():
     if len(args) >= 1:
         filepaths = args
         gemdir = os.path.join(rootdir, 'var', 'gem')
-        themedir = os.path.join(rootdir, 'theme')
         for filepath in filepaths:
-            build_doc(gemdir, themedir, filepath)
+            build_doc(gemdir, filepath)
         return
     sys.stdout.write(usage.format(sys.argv[0]))
     sys.exit(1)
