@@ -95,7 +95,8 @@ def asciidoctor_pdf(gemdir, filepath):
     }
     subprocess.check_call(args, cwd=filedir, env=env)
 
-def build_doc(gemdir, filepath):
+def build_doc(rootdir, filepath):
+    gemdir = os.path.join(rootdir, 'var', 'gem')
     create_gemdir(
         gemdir,
         packages=[
@@ -136,9 +137,8 @@ def main():
     args = sys.argv[1:]
     if len(args) >= 1:
         filepaths = args
-        gemdir = os.path.join(rootdir, 'var', 'gem')
         for filepath in filepaths:
-            build_doc(gemdir, filepath)
+            build_doc(rootdir, filepath)
         return
     sys.stdout.write(usage.format(sys.argv[0]))
     sys.exit(1)
