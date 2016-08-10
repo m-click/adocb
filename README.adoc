@@ -1,3 +1,6 @@
+:output: README
+:toc: left
+
 # Adocb – AsciiDoc Builder
 
 ## Installation on MacOS X
