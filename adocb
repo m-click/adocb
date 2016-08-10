@@ -41,6 +41,8 @@ def gem_install(gemdir, packages, pre):
         'install',
         '--install-dir',
         gemdir,
+        '--bindir',
+        os.path.join(gemdir, 'bin'),
         '--no-rdoc',
         '--no-ri',
     ]
