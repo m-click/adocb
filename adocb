@@ -115,6 +115,7 @@ def build_doc(rootdir, output_format, filepath):
             'asciidoctor',
             'asciidoctor-diagram',
             'coderay',
+            'pygments.rb',
         ],
         pre_packages=[
             'asciidoctor-pdf',
